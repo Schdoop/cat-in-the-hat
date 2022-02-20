@@ -81,8 +81,8 @@ function WeatherChart() {
         <div>
             <div id='header'>
                 If the wind or gust speed is more than 
-                <input type="number" value={hatFallingSpeed} onChange={handleSpeedChange} id='speedInput' />,
-                the hat will {fallTime ? 'fall' + fallTime : 'never fall'}!
+                <input type="number" value={hatFallingSpeed} onChange={handleSpeedChange} id='speedInput' />m/s,
+                the hat will {fallTime ? 'fall ' + fallTime : 'never fall'}!
             </div>
             <div>
                 {weather &&
