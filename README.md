@@ -3,6 +3,10 @@
 This is a coding challenge task.
 Backend part can be found in 'backend' subfolder.
 
+The project can be seen in action [here](https://schdoop.github.io/cat-in-the-hat-demo/)
+
+Backend was deployed and runs on my own server [here](https://schdoop.dev:8443/weather)
+
 ## Available Scripts
 
 In the project directory, you can run:
