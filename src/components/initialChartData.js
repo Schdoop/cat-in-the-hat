@@ -17,7 +17,7 @@ export const initialChartData = {
             label: "Hat will fall",
             data: [],
             fill: true,
-            backgroundColor: "#FF9999",
+            backgroundColor: "rgba(200, 50, 50, 0.5)",
             borderColor: "#FF0000",
         }
     ]

@@ -13,28 +13,28 @@ function WeatherChart() {
     const FALL_DATASET = 2;
 
     const [weather, setWeather] = useState(null);
-    const [fallTime, setFallTime] = useState('never fall');
+    const [fallTime, setFallTime] = useState(null);
     const [hatFallingSpeed, setHatFallingSpeed] = useState(15);
 
-    const updateChartData = (intervals) => {
-        let updatedChartData = {
+    const updateWeather = (intervals) => {
+        let updatedWeather = {
             labels: initialChartData.labels,
             datasets: initialChartData.datasets
         }
 
         intervals.forEach(item => {
-            updatedChartData.labels.push(
+            updatedWeather.labels.push(
                 new Date(item.startTime).toLocaleString(
                     'en-US',
                     { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }
                 )
             );
-            updatedChartData.datasets[SPEED_DATASET].data.push(item.values.windSpeed);
-            updatedChartData.datasets[GUST_DATASET].data.push(item.values.windGust);
-            updatedChartData.datasets[FALL_DATASET].data.push(hatFallingSpeed);
+            updatedWeather.datasets[SPEED_DATASET].data.push(item.values.windSpeed);
+            updatedWeather.datasets[GUST_DATASET].data.push(item.values.windGust);
+            updatedWeather.datasets[FALL_DATASET].data.push(hatFallingSpeed);
         });
 
-        return updatedChartData;
+        return updatedWeather;
     }
 
     const handleSpeedChange = (event) => {
@@ -52,20 +52,20 @@ function WeatherChart() {
             const speed = weather.datasets[SPEED_DATASET].data[i];
             const gust = weather.datasets[GUST_DATASET].data[i];
             if(!hatFallen && (hatFallingSpeed <= gust || hatFallingSpeed <= speed)) {
-                setFallTime(`fall ${time}`);
+                setFallTime(time);
                 hatFallen = true;
             }
         }
 
         if(!hatFallen) {
-            setFallTime('never fall');
+            setFallTime(null);
         }
     }
 
     useEffect(() => {
         getWeather()
             .then(res => {
-                const updatedWeather = updateChartData(res);
+                const updatedWeather = updateWeather(res);
                 setWeather(updatedWeather);
             })
             .catch(e => {
@@ -82,7 +82,7 @@ function WeatherChart() {
             <div id='header'>
                 If the wind or gust speed is more than 
                 <input type="number" value={hatFallingSpeed} onChange={handleSpeedChange} id='speedInput' />,
-                the hat will {fallTime}!
+                the hat will {fallTime ? 'fall' + fallTime : 'never fall'}!
             </div>
             <div>
                 {weather &&
