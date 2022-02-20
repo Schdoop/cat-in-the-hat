@@ -1,59 +1,47 @@
 import {Line} from "react-chartjs-2";
 import {useEffect, useState} from "react";
 import getWeather from "./getWeather";
+import {initialChartData} from "./initialChartData";
+
 import {Chart, registerables} from 'chart.js';
 Chart.register(...registerables);
 
 function WeatherChart() {
 
-    let initialChartData = {
-        labels: [],
-        datasets: [
-            {
-                label: "Wind Speed (m/s)",
-                data: [],
-                fill: false,
-                borderColor: "#742774"
-            },
-            {
-                label: "Wind Gust (m/s)",
-                data: [],
-                fill: false,
-                borderColor: "#215690"
-            },
-            {
-                label: "Hat will fall",
-                data: [],
-                fill: true,
-                backgroundColor: "#FF9999",
-                borderColor: "#FF0000",
-            }
-        ]
-    };
+    const SPEED_DATASET = 0;
+    const GUST_DATASET = 1;
+    const FALL_DATASET = 2;
 
     let [weather, setWeather] = useState(null);
     let [fallTime, setFallTime] = useState('never fall');
     let [hatFallingSpeed, setHatFallingSpeed] = useState(15);
 
-    const fetchData = async () => {
-        const result = await getWeather();
-        const json = await result.json();
-        const intervals = json.data.timelines[0].intervals;
+    const updateChartData = (intervals) => {
+        let updatedChartData = {
+            labels: initialChartData.labels,
+            datasets: initialChartData.datasets
+        }
 
         intervals.forEach(item => {
-            initialChartData.labels.push(
+            updatedChartData.labels.push(
                 new Date(item.startTime).toLocaleString(
                     'en-US',
                     { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }
                 )
             );
-            initialChartData.datasets[0].data.push(item.values.windSpeed);
-            initialChartData.datasets[1].data.push(item.values.windGust);
-            initialChartData.datasets[2].data.push(hatFallingSpeed);
+            updatedChartData.datasets[SPEED_DATASET].data.push(item.values.windSpeed);
+            updatedChartData.datasets[GUST_DATASET].data.push(item.values.windGust);
+            updatedChartData.datasets[FALL_DATASET].data.push(hatFallingSpeed);
 
         });
-        setWeather(initialChartData);
-        checkTheFall();
+
+        return updatedChartData;
+    }
+
+    const fetchData = async () => {
+        const result = await getWeather();
+        const json = await result.json();
+        return json.data.timelines[0].intervals;
     }
 
     const handleSpeedChange = (event) => {
@@ -61,17 +49,14 @@ function WeatherChart() {
     }
 
     const checkTheFall = () => {
-        if(!weather) {
-            weather = initialChartData;
-        }
-
+        if(weather === null) return;
         weather.datasets[2].data.fill(hatFallingSpeed);
         let hatFallen = false;
 
         for(let i = 0; i < weather.labels.length; ++i) {
             const time = weather.labels[i];
-            const speed = weather.datasets[0].data[i];
-            const gust = weather.datasets[1].data[i];
+            const speed = weather.datasets[SPEED_DATASET].data[i];
+            const gust = weather.datasets[GUST_DATASET].data[i];
             if(!hatFallen && (hatFallingSpeed <= gust || hatFallingSpeed <= speed)) {
                 setFallTime(`fall ${time}`);
                 hatFallen = true;
@@ -85,13 +70,19 @@ function WeatherChart() {
 
     useEffect(() => {
         fetchData()
-            .then(r => console.log('Chart updated'))
-            .catch(e => console.log('Error updating chart:', e));
+            .then(res => {
+                const updatedWeather = updateChartData(res);
+                setWeather(updatedWeather);
+            })
+            .catch(e => {
+                console.log('Error updating chart:', e)
+            });
     }, []);
 
     useEffect( () => {
         checkTheFall();
-    }, [hatFallingSpeed]);
+    }, [hatFallingSpeed, weather]);
+
 
     return (
         <div>
