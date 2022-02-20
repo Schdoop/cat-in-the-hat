@@ -12,9 +12,9 @@ function WeatherChart() {
     const GUST_DATASET = 1;
     const FALL_DATASET = 2;
 
-    let [weather, setWeather] = useState(null);
-    let [fallTime, setFallTime] = useState('never fall');
-    let [hatFallingSpeed, setHatFallingSpeed] = useState(15);
+    const [weather, setWeather] = useState(null);
+    const [fallTime, setFallTime] = useState('never fall');
+    const [hatFallingSpeed, setHatFallingSpeed] = useState(15);
 
     const updateChartData = (intervals) => {
         let updatedChartData = {
@@ -32,16 +32,9 @@ function WeatherChart() {
             updatedChartData.datasets[SPEED_DATASET].data.push(item.values.windSpeed);
             updatedChartData.datasets[GUST_DATASET].data.push(item.values.windGust);
             updatedChartData.datasets[FALL_DATASET].data.push(hatFallingSpeed);
-
         });
 
         return updatedChartData;
-    }
-
-    const fetchData = async () => {
-        const result = await getWeather();
-        const json = await result.json();
-        return json.data.timelines[0].intervals;
     }
 
     const handleSpeedChange = (event) => {
@@ -50,7 +43,8 @@ function WeatherChart() {
 
     const checkTheFall = () => {
         if(weather === null) return;
-        weather.datasets[2].data.fill(hatFallingSpeed);
+
+        weather.datasets[FALL_DATASET].data.fill(hatFallingSpeed);
         let hatFallen = false;
 
         for(let i = 0; i < weather.labels.length; ++i) {
@@ -69,7 +63,7 @@ function WeatherChart() {
     }
 
     useEffect(() => {
-        fetchData()
+        getWeather()
             .then(res => {
                 const updatedWeather = updateChartData(res);
                 setWeather(updatedWeather);
@@ -82,7 +76,6 @@ function WeatherChart() {
     useEffect( () => {
         checkTheFall();
     }, [hatFallingSpeed, weather]);
-
 
     return (
         <div>
