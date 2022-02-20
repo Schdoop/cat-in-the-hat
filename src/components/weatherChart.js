@@ -9,7 +9,6 @@ Chart.register(...registerables);
 function WeatherChart() {
     const SPEED_DATASET = 0;
     const GUST_DATASET = 1;
-    const FALL_DATASET = 2;
 
     const [serverData, setServerData] = useState(null);
     const [hatFallingSpeed, setHatFallingSpeed] = useState(15);
@@ -76,8 +75,6 @@ function WeatherChart() {
         labels,
         serverData
     ]);
-
-    const [weather, setWeather] = useState(null);
     const [fallTime, setFallTime] = useState(null);
 
     const handleSpeedChange = (event) => {
@@ -85,15 +82,14 @@ function WeatherChart() {
     };
 
     const checkTheFall = () => {
-        if (weather === null) return;
+        if (chartData === null) return;
 
-        weather.datasets[FALL_DATASET].data.fill(hatFallingSpeed);
         let hatFallen = false;
 
-        for (let i = 0; i < weather.labels.length; ++i) {
-            const time = weather.labels[i];
-            const speed = weather.datasets[SPEED_DATASET].data[i];
-            const gust = weather.datasets[GUST_DATASET].data[i];
+        for (let i = 0; i < chartData.labels.length; ++i) {
+            const time = chartData.labels[i];
+            const speed = chartData.datasets[SPEED_DATASET].data[i];
+            const gust = chartData.datasets[GUST_DATASET].data[i];
             if (!hatFallen && (hatFallingSpeed <= gust || hatFallingSpeed <= speed)) {
                 setFallTime(time);
                 hatFallen = true;
@@ -111,7 +107,7 @@ function WeatherChart() {
 
     useEffect(() => {
         checkTheFall();
-    }, [hatFallingSpeed, weather]);
+    }, [hatFallingSpeed, chartData]);
 
     if (!serverData) {
         return null;
